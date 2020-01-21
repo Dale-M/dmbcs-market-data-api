@@ -1,0 +1,6 @@
+lib_LTLIBRARIES  =  libdmbcs-market-data-api.la
+include_HEADERS  =  dmbcs-market-data-api.h
+
+libdmbcs_market_data_api_la_SOURCES  =  dmbcs-market-data-api.cc
+
+MAINTAINERCLEANFILES  =  auto-config.h.in  makefile.in

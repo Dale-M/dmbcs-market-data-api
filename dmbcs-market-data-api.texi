@@ -1,0 +1,339 @@
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename dmbcs-market-data-api.info
+@settitle DMBCS Market Data Server API
+@documentencoding utf-8
+@c %**end of header
+@copying
+DMBCS Market Data Server API
+
+Copyright @copyright{} 2020  DM Bespoke Computer Solutions Ltd
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
+copy of the license is included in the section entitled ``GNU Free
+Documentation License''.
+
+A copy of the license is also available from the Free Software
+Foundation Web site at @url{http://www.gnu.org/licenses/fdl.html}.
+
+@end quotation
+@end copying
+
+@titlepage
+@title DMBCS Market Data Server API 1.0
+@author Dale Mellor
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@ifnottex
+@node Top, Introduction, (dir), (dir)
+@top DMBCS Market Data Server API 1.0
+
+@insertcopying
+@end ifnottex
+
+@c Generate the nodes for this menu with `C-c C-u C-m'.
+@menu
+* Introduction::
+* Installation of the library::
+* Use example::
+* Detailed reference::
+* Copying This Manual::
+* Function index::
+* Index::
+@end menu
+
+@c Update all node entries with `C-c C-u C-n'.
+@c Insert new nodes with `C-c C-c n'.
+
+@contents
+
+@node Introduction, Installation of the library, Top, Top
+@chapter Introduction
+@section The DMBCS Market Data Service
+
+While there are several open APIs available on the Internet for fetching
+stock market trading data, there are scant few which provide data of the
+markets themselves, in particular it is quite difficult to
+programmatically get an enumeration of all the components of a
+particular market from the Internet.
+
+The DMBCS Market Data service provides this facility, offering two
+end-points which enumerate all markets known to the system and all
+components of any given market.  The service provides a RESTful API which
+is currently freely available without registration.  More information
+can be found at @url{https://rdmp.org/dmbcs/trader-desk}.
+
+
+@section The C++ Library
+
+This is a small library (about 140 physical source lines of code) which
+should be taken both as a production library and reference
+implementation of the protocol which the DMBCS Market Data service
+expects clients to implement.
+
+
+@section ‘DMBCS’?
+
+@cindex DMBCS namespace
+@cindex DMBCS discriminator
+This isnʼt a vanity or promotional project with any kind of commercial
+restriction, it is something that was needed and is being shared so that
+others can benefit from the effort that has been spent on the
+development, and maybe improve upon it.
+
+@cindex GNU license
+It is not our wish to preclude the development of alternative libraries
+which meet the same goals as ours, and if such were to materialize we
+need a way to refer to our own implementation specifically and allow it
+to sit in harmony with any other library that might come along.  So we
+use ‘DMBCS’ to provide our distinguishing label: this is appended to the
+front of the package name, and all of the C++ code comes inside a
+namespace with this label.  These should be considered to be five random
+letters: okay, they are abbreviated from DM Bespoke Computer Solutions
+Ltd, the original authorʼs company, but the project is released as fully
+free, open source software (FOSS) which falls under the GNU GPLv3
+license, so you should treat it as any other component in your free,
+open operating system (@emph{Please} donʼt tell me you actually pay
+money for some inferior OS beyond the eyes of humble scrutineers).
+
+
+@node Installation of the library, Use example, Introduction, Top
+@chapter Installation of the library
+
+@cindex GIT
+@cindex code repository
+You will require the @code{git} code management system.  At the
+terminal, type
+
+@code{git clone https://rdmp.org/dmbcs/market-data-api.git dmbcs-market-data-api},
+
+and then you will have a newly created directory called
+@code{dmbcs-market-data-api} which contains the full source code for the
+program.  Type @code{cd dmbcs-market-data-api} to enter that directory.
+
+@cindex autotools
+@cindex autoconf
+@cindex automake
+@cindex libtool
+@cindex pkg-config
+The libraryʼs build configuration system is GNUʼs @code{autotools}.  You
+will need @code{autoconf}, @code{automake}, and @code{libtool}, and
+@code{pkg-config}.  At the terminal, type
+
+@code{autoreconf --install;   ./configure}.
+
+@cindex openssl
+@cindex curl
+@cindex curlpp
+You may at this point see errors relating to lack of openssl, curl,
+curlpp packages.  You must address these issues in your operating system
+and perform a successful @code{./configure} before you can proceed with
+the dmbcs-market-data-api build.
+
+@cindex make
+@cindex non-privileged install
+The libraryʼs build is undertaken by GNU make.  You will need the
+@code{make} package on your system (GNU make is probably not necessary,
+any modern incarnation of make will most likely suffice).  Type
+@code{make && sudo make install} to build and install the library in
+your system.  Note that the sudo command will require that you have
+sufficient privilege on your system, and you may have to type in your
+system password (for a local build not requiring such privilege, in a
+pinch, do @code{./configure --prefix=install-here && make install}).
+
+That should be it.  Try making and running the example program described
+below (Section 3).
+
+@node Use example, Detailed reference, Installation of the library, Top
+@chapter Use example
+
+To get a summary of the current list of markets the server knows about,
+write the following C++ code
+
+@cindex @sortas{H} ``hello, world'' example
+@findex get_markets
+@example
+#include <dmbcs-market-data-api.h>
+#include <iostream>
+
+int main ()
+@{
+    cURLpp::initialize ();
+    const auto  markets  @{DMBCS::Market_Data_Api::get_markets ()@};
+    for  (const auto&  M  :  markets)
+       std::cout  <<  M.symbol  <<  ": "  <<  M.name  << "\n";
+    return 0;
+@}
+@end example
+
+@cindex application compilation
+@cindex compilation
+If this code is stored in a file called @code{markets.cc}, compile it
+with a line like (this should be typed all on one line, without the
+back-slash)
+@example
+g++ $( pkg-config --cflags --libs dmbcs-market-data-api ) \
+   a.cc -o markets
+@end example
+and then you will have an executable file called @code{markets}.  (If
+you installed the library in a non-standard place, you may need to
+@code{export PKG_CONFIG_PATH=<path>/lib/pkgconfig} prior to running the
+g++ command, and then setting @code{LD_LIBRARY_PATH}.)  Run this and
+observe the result in your terminal (provided that your internet
+connection is okay); you should see a list of symbols and human-readable
+names of various stock markets).
+
+If this doesnʼt work for you, you either havenʼt installed
+dmbcs-market-data-api properly yet (see instructions in Section 2
+above), or you need to improve your operating system, or get a better
+one; this is as far as we hand-hold you here.
+
+@node Detailed reference, Copying This Manual, Use example, Top
+@chapter Detailed reference
+
+@cindex libcurlpp initialization
+An important point of note.  This library uses libcurlpp, and
+@emph{assumes that that library has been initialized}.  See the example
+code above for an idea how to do this (it must be done exactly once in
+your application).
+
+@cindex library initialization
+Note that the @code{dmbcs-market-data-api} library itself requires no
+explicit global initialization or finalization.
+
+@cindex thread safety
+The library is not thread safe; there are severe limits to the volume
+and regularity of data transfer through the Market Data API, and, given
+the turn-around times of the accesses, access to the library should be
+considered a strictly serial activity for which parallelism has no
+purpose.  If, however, delayed blocking behaviour is unsatisfactory for
+your application and you need to realize asynchronous communications
+channels with the Exchange, running the @code{dmbcs-market-data-api}
+entirely in a thread separate from the main one would be appropriate.
+
+@section Exceptions
+
+The @code{dmbcs-market-data-api} client library may throw two
+exceptions, @emph{both derived from @code{std::runtime_error}}:
+@code{DMBCS::Market_Data_Api::No_Network} and
+@code{DMBCS::Market_Data_Api::Bad_Communication}.  Both these will
+convey the implied meaning, and will be furnished with human-readable
+error messages (via the @code{what()} methods) that clarify the
+situation.  Note especially that @code{Bad_Communication} will be thrown
+if the service refuses to provide data due to too many requests being
+received in a short time interval.
+
+@section Enumerating the markets
+
+@subsection The @code{Market} object
+
+This is a pure @code{struct} with the following members.
+
+@table @code
+@item string symbol
+The string by which the Market Data Server identifies this market.  It
+should be passed to the @code{get_component_delta} function, for
+example.
+
+@item string component_extension
+The symbol which Yahoo! appends to all stock items after a period.  For
+example @code{BP.L} is the ticker symbol for BP on the London stock
+exchange, hence the market symbol is ``@code{L}''.
+
+@item string name
+Human-readable, although terse, string which identifies the market,
+e.g. ``FTSE 100''.
+
+@item std::chrono::system_clock::duration close_time
+The time interval after midnight at which the market closes each day.
+This should be regarded as indicative only and will not account for
+extraordinary days or other variations.
+
+@end table
+
+@subsection The @code{get_markets} function
+@findex get_markets
+Simply calling the @code{DMBCS::Market_Data_Api::get_markets ()}
+function will return a STL container full of @code{Market} objects, each
+describing one of the markets the server follows, the collection
+enumerating all of the markets that the server follows.
+
+
+@subsection The @code{Delta} object
+This is a pure @code{struct} which describes @emph{changes} in the
+components of a market, such as additions, removals and sideways
+movements.  The members are
+
+@table @code
+@item string symbol
+The @emph{Yahoo!} ticker symbol for the component, sans any market
+suffix.
+
+@item string name
+A human-readable name of this component, i.e. company name.
+
+@item enum@{ADD, REMOVE, SIDEWAYS@} action
+Has the company recently entered the market, or left it?  Or perhaps
+this is a sideways movement: change of name, symbol and/or market of a
+market component already being tracked.
+
+@end table
+
+@subsection The @code{get_component_delta} function
+@findex get_component_delta
+This function returns a container of all the changes that have taken
+place in the constitution of a market since a given time.  Applications
+are encouraged to keep track of the times that this function is called,
+and only request changes since the last call.  The precise signature of
+the function is
+
+@code{std::vector<Delta>  DMBCS::Market_Data_Api::get_component_delta  (const
+string&  market_symbol,  const time_t&  last_time);}
+
+where
+
+@table @code
+@item const std::string&  market_symbol
+Identifies the market for which constituent changes are required.
+
+@item const time_t&  last_time
+Is the (UNIX) time from which changes need to be reported.
+
+@end table
+
+@findex get_component_delta
+For example,
+
+@example
+   auto  changes  =  DMBCS::Market_Data_Api::get_component_delta ("FTSE", 0);
+@end example
+
+will list @emph{all} current components of the FTSE 100 listing.
+
+
+@node Copying This Manual, Function index, Detailed reference, Top
+@appendix Copying This Manual
+
+@c Get fdl.texi from http://www.gnu.org/licenses/fdl.html
+@include fdl.texi
+
+@node Function index, Index, Copying This Manual, Top
+@unnumbered Function index
+
+@printindex fn
+
+@node Index,  , Function index, Top
+@unnumbered Index
+
+@printindex cp
+
+@bye
+
+@c dmbcs-market-data-api.texi ends here

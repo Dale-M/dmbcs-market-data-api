@@ -1,0 +1,11 @@
+prefix       =  @prefix@
+exec_prefix  =  ${prefix}
+libdir       =  ${exec_prefix}/lib
+includedir   =  ${prefix}/include
+
+Name        :  dmbcs-market-data-api
+Description :  DMBCS Market Data Service C++ interface library
+Version     :  @VERSION@
+Requires    :  curlpp  openssl
+Libs        :  -L${libdir}  -ldmbcs-market-data-api  @third_party_LIBS@
+Cflags      :  -I${includedir}  @third_party_CFLAGS@
