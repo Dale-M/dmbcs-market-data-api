@@ -155,7 +155,7 @@ vector<Delta>  get_component_delta  (const string&  market_symbol,
             /* Remember that these fields are injected into a database, so
              * be wary of unsanitary inputs. */
             static const regex  part 
-                       {" *\\( *([^\"' ]+) *\"([^\"]+)\" *([-+*])( [^)]*)?\\)"};
+                {" *\\( *\"?([^\"' ]+)\"? *\"([^\"]+)\" *([-+*])( [^)]*)?\\)"};
 
             if (! regex_search (cursor, end (response), m, part,
                                 regex_constants::match_continuous))
