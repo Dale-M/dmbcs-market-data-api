@@ -68,7 +68,7 @@ The DMBCS Market Data service provides this facility, offering two
 end-points which enumerate all markets known to the system and all
 components of any given market.  The service provides a RESTful API which
 is currently freely available without registration.  More information
-can be found at @url{https://rdmp.org/dmbcs/trader-desk}.
+can be found at @url{https://rdmp.org/trader-desk}.
 
 
 @section The C++ Library
@@ -112,7 +112,10 @@ money for some inferior OS beyond the eyes of humble scrutineers).
 You will require the @code{git} code management system.  At the
 terminal, type
 
-@code{git clone https://rdmp.org/dmbcs/market-data-api.git dmbcs-market-data-api},
+@example
+git clone https://rdmp.org/dmbcs/market-data-api.git  \
+              dmbcs-market-data-api
+@end example
 
 and then you will have a newly created directory called
 @code{dmbcs-market-data-api} which contains the full source code for the
@@ -294,8 +297,11 @@ are encouraged to keep track of the times that this function is called,
 and only request changes since the last call.  The precise signature of
 the function is
 
-@code{std::vector<Delta>  DMBCS::Market_Data_Api::get_component_delta  (const
-string&  market_symbol,  const time_t&  last_time);}
+@example
+std::vector<Delta>  DMBCS::Market_Data_Api::get_component_delta
+                               (const string&  market_symbol,
+                                const time_t&  last_time)
+@end example
 
 where
 
@@ -315,7 +321,8 @@ For example,
    auto  changes  =  DMBCS::Market_Data_Api::get_component_delta ("FTSE", 0);
 @end example
 
-will list @emph{all} current components of the FTSE 100 listing.
+will get @emph{all} current components of the FTSE 100 listing (you can
+iterate over the @code{Delta} members of the @code{changes} container).
 
 
 @node Copying This Manual, Function index, Detailed reference, Top
